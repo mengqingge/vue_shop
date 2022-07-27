@@ -44,8 +44,11 @@
           <template #default="scope">
             <el-button size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
             <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row)"></el-button>
+
             <el-tooltip effect="dark" content="分配角色" placement="top">
-              <el-button size="mini" type="warning" icon="el-icon-setting" @click="handleSetting(scope.$index, scope.row)"></el-button>
+
+              <el-button size="mini" type="warning" icon="el-icon-setting" @click="handleSetting(scope.row)"></el-button>
+
             </el-tooltip>
           </template>
         </el-table-column>
@@ -61,6 +64,7 @@
       <!-- 主体区域 -->
       <el-form :model="addRuleForm" :rules="addRules" ref="addFormRef" label-width="70px">
         <!--用username，关闭添加用户对话框不能重置 -->
+        <!-- prop 要和v-model="addRuleForm. "出来的名字一样 -->
         <!-- <el-form-item label="用户名" prop="username"> -->
         <el-form-item label="用户名" prop="name">
           <el-input v-model="addRuleForm.name"></el-input>
@@ -104,6 +108,22 @@
         <el-button type="primary" @click="editUserBtn">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 分配角色弹框 -->
+    <el-dialog title="分配角色" :visible.sync="settingDialogVisible" width="50%" @close="closeSettingDiolog">
+      <p>当前的用户：{{settingUserInfo.username}}</p>
+      <p>当前的角色：{{settingUserInfo.role_name}}</p>
+      <p>分配新角色：
+        <el-select v-model="selectRoleId" placeholder="请选择">
+          <el-option v-for="item in userInfoList" :key="item.id" :label="item.roleName" :value="item.id">
+          </el-option>
+        </el-select>
+      </p>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="settingDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="confirmSetting">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -137,6 +157,8 @@ export default {
       userDialogVisible: false,
       // 修改用户弹框
       editDialogVisible: false,
+      // 分配角色弹框
+      settingDialogVisible: false,
 
       addRules: {
         // username: [
@@ -181,6 +203,12 @@ export default {
         // mobile: '',
         // id: '',
       },
+
+      // 需要被分配角色的用户信息
+      settingUserInfo: {},
+      // 所有角色的数据列表
+      userInfoList: [],
+      selectRoleId: '',
     }
   },
 
@@ -286,9 +314,6 @@ export default {
         // 响应回来的res是修改过的数据，
         console.log(res)
         if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
-        // this.editRuleForm.name = res.data.username
-        // this.editRuleForm.email = res.data.email
-        // this.editRuleForm.mobile = res.data.mobile
 
         this.editDialogVisible = false
         this.getUsersList()
@@ -318,8 +343,45 @@ export default {
       this.getUsersList()
       this.$message.success(res.meta.msg)
     },
-    
-    handleSetting() {},
+
+    // 分配角色对话框
+    async handleSetting(scope) {
+      console.log(scope)
+      this.settingDialogVisible = true
+      this.settingUserInfo = scope
+      // this.settingUserInfo.username = scope.username
+      // this.settingUserInfo.role_name = scope.role_name
+      // this.settingUserInfo.id = scope.id
+      console.log(this.settingUserInfo)
+
+      // 先获取角色列表
+      const { data: res } = await this.$http.get('roles')
+      // console.log(res)
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.$message.success(res.meta.msg)
+      this.userInfoList = res.data
+      console.log(this.userInfoList)
+    },
+    // 确定分配角色
+    async confirmSetting() {
+      if (!this.selectRoleId) return this.$message.error('选择一个角色')
+      const { data: settingRole } = await this.$http.put(
+        `users/${this.settingUserInfo.id}/role`,
+        { rid: this.selectRoleId }
+      )
+      console.log(settingRole)
+      if (settingRole.meta.status !== 200)
+        return this.$message.error(settingRole.meta.msg)
+      this.$message.success(settingRole.meta.msg)
+      this.settingDialogVisible = false
+      this.getUsersList()
+      // console.log(this.selectRoleId)
+    },
+    // 分配角色对话框关闭
+    closeSettingDiolog() {
+      this.selectRoleId = ''
+      this.settingUserInfo = {}
+    },
   },
 
   created() {

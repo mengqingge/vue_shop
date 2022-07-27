@@ -81,6 +81,7 @@ export default {
       //   console.log(res.data)
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       this.menuList = res.data
+      // console.log(res);
     },
 
     handleOpen(key, keyPath) {
