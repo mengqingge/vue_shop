@@ -9,14 +9,17 @@ import './assets/css/global.css'
 // 引入icon图标
 import './assets/fonts/iconfont.css'
 
+import treeTable from 'vue-table-with-tree-grid'
+
 import axios from 'axios'
+
 // 配饰请求的根路径
 axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/"
 // 配饰请求拦截器
 axios.interceptors.request.use(config => {
   // console.log(config);
   // 必须是Authorization这个单词
-  config.headers.Authorization=window.sessionStorage.getItem('token')
+  config.headers.Authorization = window.sessionStorage.getItem('token')
   // 必须return
   return config
 })
@@ -24,6 +27,8 @@ axios.interceptors.request.use(config => {
 Vue.prototype.$http = axios
 
 Vue.config.productionTip = false
+
+Vue.component('tree-table', treeTable)
 
 new Vue({
   router,
