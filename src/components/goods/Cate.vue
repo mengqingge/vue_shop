@@ -142,7 +142,7 @@ export default {
       const { data: res } = await this.$http.get('categories', {
         params: this.queryInfo,
       })
-      //   console.log(res)
+        console.log(res)
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       this.$message.success(res.meta.msg)
       this.cateList = res.data.result
