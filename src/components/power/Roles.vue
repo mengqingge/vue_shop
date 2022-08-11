@@ -12,7 +12,7 @@
       <el-button type="primary" @click="rolesDialogVisible = true">添加角色</el-button>
 
       <!-- 角色列表区域 -->
-      <el-table :data="rolesList" stripe style="width: 100%;margin-top:20px" border>
+      <el-table :data="rolesList" stripe style="width: 100%;margin-top:20px" border row-key="id">
         <!-- expand展开列 -->
         <el-table-column type="expand">
           <template #default="scope">
@@ -302,10 +302,10 @@ export default {
     async showSetRightDialog(role) {
       this.clickRoleId = role.id
       const { data: res } = await this.$http.get('rights/tree')
-    //   console.log(res)
+      //   console.log(res)
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       this.rightsList = res.data
-    //   console.log(this.rightsList)
+      //   console.log(this.rightsList)
 
       this.getDefaultKeys(role, this.defaultKeys)
 
@@ -344,7 +344,7 @@ export default {
           rids: ridsStr,
         }
       )
-    //   console.log(res)
+      //   console.log(res)
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       this.$message.success(res.meta.msg)
       this.getRolesList()
